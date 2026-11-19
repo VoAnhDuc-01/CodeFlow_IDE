@@ -1,0 +1,236 @@
+{
+  "sourceVscodeVersion": "1.148.0",
+  "htmlLanguageConfiguration": {
+    "comments": {
+      "blockComment": [
+        "<!--",
+        "-->"
+      ]
+    },
+    "brackets": [
+      [
+        "<!--",
+        "-->"
+      ],
+      [
+        "{",
+        "}"
+      ],
+      [
+        "(",
+        ")"
+      ]
+    ],
+    "autoClosingPairs": [
+      {
+        "open": "{",
+        "close": "}"
+      },
+      {
+        "open": "[",
+        "close": "]"
+      },
+      {
+        "open": "(",
+        "close": ")"
+      },
+      {
+        "open": "'",
+        "close": "'"
+      },
+      {
+        "open": "\"",
+        "close": "\""
+      },
+      {
+        "open": "<!--",
+        "close": "-->",
+        "notIn": [
+          "comment",
+          "string"
+        ]
+      }
+    ],
+    "surroundingPairs": [
+      {
+        "open": "'",
+        "close": "'"
+      },
+      {
+        "open": "\"",
+        "close": "\""
+      },
+      {
+        "open": "{",
+        "close": "}"
+      },
+      {
+        "open": "[",
+        "close": "]"
+      },
+      {
+        "open": "(",
+        "close": ")"
+      },
+      {
+        "open": "<",
+        "close": ">"
+      }
+    ],
+    "colorizedBracketPairs": [],
+    "folding": {
+      "markers": {
+        "start": "^\\s*<!--\\s*#region\\b\\s*(?<label>.*?)\\s*-->",
+        "end": "^\\s*<!--\\s*#endregion\\b.*-->"
+      }
+    },
+    "wordPattern": "(-?\\d*\\.\\d\\w*)|([^\\`\\~\\!\\@\\$\\^\\&\\*\\(\\)\\=\\+\\[\\{\\]\\}\\\\\\|\\;\\:\\'\\\"\\,\\.\\<\\>\\/\\s]+)",
+    "onEnterRules": [
+      {
+        "beforeText": {
+          "pattern": "<(?!(?:area|base|br|col|embed|hr|img|input|keygen|link|menuitem|meta|param|source|track|wbr))([_:\\w][_:\\w-.\\d]*)(?:(?:[^'\"/>]|\"[^\"]*\"|'[^']*')*?(?!\\/)>)[^<]*$",
+          "flags": "i"
+        },
+        "afterText": {
+          "pattern": "^<\\/([_:\\w][_:\\w-.\\d]*)\\s*>",
+          "flags": "i"
+        },
+        "action": {
+          "indent": "indentOutdent"
+        }
+      },
+      {
+        "beforeText": {
+          "pattern": "<(?!(?:area|base|br|col|embed|hr|img|input|keygen|link|menuitem|meta|param|source|track|wbr))([_:\\w][_:\\w-.\\d]*)(?:(?:[^'\"/>]|\"[^\"]*\"|'[^']*')*?(?!\\/)>)[^<]*$",
+          "flags": "i"
+        },
+        "action": {
+          "indent": "indent"
+        }
+      }
+    ],
+    "indentationRules": {
+      "increaseIndentPattern": "<(?!\\?|(?:area|base|br|col|frame|hr|html|img|input|keygen|link|menuitem|meta|param|source|track|wbr)\\b|[^>]*\\/>)([-_\\.A-Za-z0-9]+)(?=\\s|>)\\b[^>]*>(?!.*<\\/\\1>)|<!--(?!.*-->)|\\{[^}\"']*$",
+      "decreaseIndentPattern": "^\\s*(<\\/(?!html)[-_\\.A-Za-z0-9]+\\b[^>]*>|-->|\\})"
+    }
+  },
+  "cssLanguageConfiguration": {
+    "comments": {
+      "blockComment": [
+        "/*",
+        "*/"
+      ]
+    },
+    "brackets": [
+      [
+        "{",
+        "}"
+      ],
+      [
+        "[",
+        "]"
+      ],
+      [
+        "(",
+        ")"
+      ]
+    ],
+    "autoClosingPairs": [
+      {
+        "open": "{",
+        "close": "}",
+        "notIn": [
+          "string",
+          "comment"
+        ]
+      },
+      {
+        "open": "[",
+        "close": "]",
+        "notIn": [
+          "string",
+          "comment"
+        ]
+      },
+      {
+        "open": "(",
+        "close": ")",
+        "notIn": [
+          "string",
+          "comment"
+        ]
+      },
+      {
+        "open": "\"",
+        "close": "\"",
+        "notIn": [
+          "string",
+          "comment"
+        ]
+      },
+      {
+        "open": "'",
+        "close": "'",
+        "notIn": [
+          "string",
+          "comment"
+        ]
+      }
+    ],
+    "surroundingPairs": [
+      [
+        "{",
+        "}"
+      ],
+      [
+        "[",
+        "]"
+      ],
+      [
+        "(",
+        ")"
+      ],
+      [
+        "\"",
+        "\""
+      ],
+      [
+        "'",
+        "'"
+      ]
+    ],
+    "folding": {
+      "markers": {
+        "start": "^\\s*\\/\\*\\s*#region\\b\\s*(?<label>.*?)\\s*\\*\\/",
+        "end": "^\\s*\\/\\*\\s*#endregion\\b.*\\*\\/"
+      }
+    },
+    "indentationRules": {
+      "increaseIndentPattern": "(^.*\\{[^}]*$)",
+      "decreaseIndentPattern": "^\\s*\\}"
+    },
+    "wordPattern": "(#?-?\\d*\\.\\d\\w*%?)|(::?[\\w-]*(?=[^,{;]*[,{]))|(([@#.!])?[\\w-?]+%?|[@#!.])"
+  },
+  "htmlSnippets": {
+    "html doc": {
+      "isFileTemplate": true,
+      "body": [
+        "<!DOCTYPE html>",
+        "<html>",
+        "<head>",
+        "\t<meta charset=\"UTF-8\" />",
+        "\t<title>${1:title}</title>",
+        "</head>",
+        "<body>",
+        "\t$0",
+        "</body>",
+        "</html>"
+      ],
+      "description": "HTML Document"
+    }
+  },
+  "grammarMeta": {
+    "htmlScopeName": "text.html.basic",
+    "cssScopeName": "source.css"
+  }
+}

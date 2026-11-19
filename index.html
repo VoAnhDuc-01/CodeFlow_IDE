@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="color-scheme" content="light dark" />
+  <meta name="codeflow-backend" content="static" />
+  <script>
+    try {
+      document.querySelector('meta[name="color-scheme"]').content = localStorage.getItem('color-scheme') ?? 'light dark';
+    } catch {}
+  </script>
+  <title>CodeFlow IDE — VS Code Core + Gợi ý HTML/CSS liên tục theo tên file</title>
+  <link rel="stylesheet" href="./vendor/vscode-editor.css" />
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+  <div class="ide-shell">
+    <header class="ide-topbar">
+      <div class="brand-cluster">
+        <span class="brand-mark" aria-hidden="true">&lt;/&gt;</span>
+        <div class="brand-text">
+          <strong>CodeFlow IDE</strong>
+          <span class="brand-sub" id="vscode-source-badge">VS Code Core</span>
+        </div>
+        <span class="active-intent-chip" id="topbar-intent-chip">Sẵn sàng</span>
+      </div>
+
+      <div class="ide-toolbar" role="toolbar" focusgroup="toolbar wrap" aria-label="Điều khiển IDE chính" aria-controls="editor-container">
+        <div role="group" aria-label="Chế độ gợi ý" class="toolbar-group">
+          <label class="mode-select-wrap" for="suggest-mode-select">
+            <span class="sr-only">Chế độ gợi ý</span>
+            <select id="suggest-mode-select" aria-label="Chế độ gợi ý liên tục">
+              <option value="smart">Gợi ý: Thông minh</option>
+              <option value="line">Gợi ý: Từng dòng</option>
+              <option value="block">Gợi ý: Theo khối</option>
+              <option value="off">Gợi ý: Tắt</option>
+            </select>
+          </label>
+          <button type="button" id="btn-accept-next" class="tb-btn tb-primary" title="Nhận gợi ý tiếp theo (Tab)">
+            <span>Tab: Nhận gợi ý</span>
+          </button>
+          <button type="button" id="btn-cycle-alt" class="tb-btn" title="Đổi phương án gợi ý (Alt+])">
+            <span>Đổi mẫu</span>
+          </button>
+        </div>
+
+        <span role="separator" aria-orientation="vertical" class="tb-sep"></span>
+
+        <div role="group" aria-label="Thao tác tệp và xem trước" class="toolbar-group">
+          <button type="button" id="btn-format" class="tb-btn" title="Định dạng HTML/CSS (Shift+Alt+F)">
+            <span>Format</span>
+          </button>
+          <button type="button" id="btn-save" class="tb-btn" title="Lưu file (Ctrl+S)">
+            <span>Lưu</span>
+          </button>
+          <button type="button" id="btn-toggle-preview" class="tb-btn" aria-pressed="true" title="Bật/tắt Live Preview">
+            <span>Live Preview</span>
+          </button>
+        </div>
+
+        <span role="separator" aria-orientation="vertical" class="tb-sep"></span>
+
+        <div role="group" aria-label="Giao diện và cài đặt" class="toolbar-group">
+          <label class="mode-select-wrap" for="theme-select">
+            <span class="sr-only">Giao diện VS Code</span>
+            <select id="theme-select" aria-label="Giao diện VS Code">
+              <option value="dark-modern">Dark Modern</option>
+              <option value="dark-plus">Dark+</option>
+              <option value="light-modern">Light Modern</option>
+              <option value="light-plus">Light+</option>
+            </select>
+          </label>
+          <button type="button" id="btn-open-settings" class="tb-btn" title="Cài đặt gợi ý và trình soạn thảo">
+            <span>Cài đặt gợi ý</span>
+          </button>
+        </div>
+      </div>
+
+      <p role="status" id="live-status" class="sr-only" aria-live="polite"></p>
+    </header>
+
+    <div class="ide-workspace">
+      <aside class="ide-sidebar scroller" aria-label="Quản lý tệp dự án">
+        <div class="sidebar-header">
+          <span class="sidebar-title">EXPLORER</span>
+          <div class="sidebar-actions">
+            <button type="button" id="btn-new-html" class="icon-btn" title="Tạo file HTML mới">+HTML</button>
+            <button type="button" id="btn-new-css" class="icon-btn" title="Tạo file CSS mới">+CSS</button>
+            <button type="button" id="btn-change-root" class="icon-btn" title="Đổi thư mục dự án trên máy">Thư mục</button>
+          </div>
+        </div>
+
+        <div class="workspace-path-bar" id="workspace-path-label" title="">workspace</div>
+
+        <div class="quick-templates" aria-label="Tạo nhanh theo tên file gợi ý">
+          <div class="section-mini-label">Thử tạo nhanh theo tên file:</div>
+          <div class="template-chips">
+            <button type="button" class="tpl-chip" data-newfile="navbar.html">navbar.html</button>
+            <button type="button" class="tpl-chip" data-newfile="pricing.html">pricing.html</button>
+            <button type="button" class="tpl-chip" data-newfile="dashboard.html">dashboard.html</button>
+            <button type="button" class="tpl-chip" data-newfile="modal.html">modal.html</button>
+            <button type="button" class="tpl-chip" data-newfile="animations.css">animations.css</button>
+            <button type="button" class="tpl-chip" data-newfile="button.css">button.css</button>
+          </div>
+        </div>
+
+        <nav class="file-tree scroller" id="file-tree" aria-label="Danh sách tệp"></nav>
+      </aside>
+
+      <main class="ide-main">
+        <div class="editor-pane">
+          <div class="tabs-bar scroller" id="tabs-bar" role="tablist" aria-label="Các tệp đang mở"></div>
+
+          <section class="suggestion-ribbon" aria-label="Trạng thái gợi ý theo tên file">
+            <div class="ribbon-left">
+              <span class="ribbon-dot" aria-hidden="true"></span>
+              <span id="ribbon-summary">Đang phân tích tên file...</span>
+              <button type="button" id="btn-open-partner" class="partner-pill" hidden>Mở file liên kết</button>
+            </div>
+            <div class="ribbon-right">
+              <span class="kbd-hint">Nhấn <kbd>Tab</kbd> nhận ghost-text • <kbd>Enter</kbd> xuống dòng để gợi ý tiếp</span>
+            </div>
+          </section>
+
+          <div class="editor-wrap">
+            <div id="editor-container"></div>
+          </div>
+        </div>
+
+        <aside class="right-dock" id="right-dock" aria-label="Xem trước và Luồng gợi ý liên tục">
+          <div class="preview-panel" id="preview-panel">
+            <div class="panel-header">
+              <span class="panel-title">LIVE PREVIEW</span>
+              <div class="panel-controls">
+                <button type="button" id="btn-preview-desktop" class="mini-btn" aria-pressed="true" title="Chế độ Desktop">Desktop</button>
+                <button type="button" id="btn-preview-mobile" class="mini-btn" aria-pressed="false" title="Chế độ Mobile 390px">Mobile</button>
+                <button type="button" id="btn-preview-refresh" class="mini-btn" title="Tải lại Preview">↻</button>
+              </div>
+            </div>
+            <div class="preview-stage" id="preview-stage">
+              <iframe id="preview-frame" title="Xem trước HTML/CSS" sandbox="allow-scripts allow-forms allow-modals"></iframe>
+            </div>
+          </div>
+
+          <div class="stream-panel scroller" aria-label="Luồng gợi ý code liên tục">
+            <div class="panel-header">
+              <span class="panel-title">LUỒNG GỢI Ý LIÊN TỤC</span>
+              <button type="button" id="btn-refresh-suggest" class="mini-btn" title="Làm mới gợi ý theo vị trí con trỏ">Làm mới gợi ý</button>
+            </div>
+            <div class="stream-body" id="suggestion-stream"></div>
+          </div>
+        </aside>
+      </main>
+    </div>
+
+    <footer class="ide-statusbar">
+      <div class="status-left">
+        <span id="status-problems" class="status-item">0 lỗi • 0 cảnh báo</span>
+        <span id="status-partner" class="status-item">Liên kết: —</span>
+      </div>
+      <div class="status-right">
+        <span id="status-cursor" class="status-item">Ln 1, Col 1</span>
+        <span id="status-language" class="status-item">HTML</span>
+        <span id="status-engine" class="status-item">Gợi ý liên tục: Thông minh</span>
+      </div>
+    </footer>
+  </div>
+
+  <!-- File Action Modal (New File / Rename / Workspace Folder) -->
+  <dialog id="file-dialog" class="ide-dialog" closedby="any" aria-labelledby="file-dialog-title">
+    <form method="dialog" class="dialog-form" id="file-dialog-form">
+      <header class="dialog-header">
+        <h2 id="file-dialog-title">Tạo tệp mới</h2>
+        <button type="button" class="dialog-close" data-dialog-close aria-label="Đóng hộp thoại">✕</button>
+      </header>
+      <div class="dialog-body">
+        <p id="file-dialog-desc" class="dialog-desc"></p>
+        <label class="dialog-label" for="file-dialog-input">Tên / Đường dẫn</label>
+        <input id="file-dialog-input" class="dialog-input" type="text" required autocomplete="off" />
+      </div>
+      <footer class="dialog-footer">
+        <button type="button" class="tb-btn" data-dialog-close>Hủy</button>
+        <button type="submit" value="confirm" class="tb-btn tb-primary">Xác nhận</button>
+      </footer>
+    </form>
+  </dialog>
+
+  <!-- Suggestion & Editor Settings Modal -->
+  <dialog id="settings-dialog" class="ide-dialog" closedby="any" aria-labelledby="settings-dialog-title">
+    <form method="dialog" class="dialog-form" id="settings-dialog-form">
+      <header class="dialog-header">
+        <h2 id="settings-dialog-title">Cài đặt Gợi ý Liên tục &amp; Trình soạn thảo</h2>
+        <button type="button" class="dialog-close" data-dialog-close aria-label="Đóng cài đặt">✕</button>
+      </header>
+      <div class="dialog-body">
+        <div class="settings-section">
+          <h3>Tùy chọn gợi ý theo tên file HTML / CSS</h3>
+          <p class="dialog-desc">Điều chỉnh cách hiển thị gợi ý liên tục và định dạng soạn thảo theo thói quen của bạn.</p>
+          <label class="dialog-check">
+            <input type="checkbox" id="cfg-auto-close" checked />
+            <span>Tự động đóng thẻ HTML khi gõ dấu &gt;</span>
+          </label>
+          <label class="dialog-check">
+            <input type="checkbox" id="cfg-word-wrap" checked />
+            <span>Tự động xuống dòng (Word Wrap)</span>
+          </label>
+          <div class="settings-grid">
+            <div>
+              <label class="dialog-label" for="cfg-font-size">Cỡ chữ (px)</label>
+              <input id="cfg-font-size" class="dialog-input" type="number" min="11" max="22" step="0.5" value="13.5" />
+            </div>
+            <div>
+              <label class="dialog-label" for="cfg-tab-size">Kích thước Tab</label>
+              <select id="cfg-tab-size" class="dialog-input">
+                <option value="2">2 dấu cách</option>
+                <option value="4">4 dấu cách</option>
+              </select>
+            </div>
+          </div>
+        </div>
+      </div>
+      <footer class="dialog-footer">
+        <button type="button" class="tb-btn" id="btn-reset-browser-ws" hidden>Khôi phục tệp mẫu</button>
+        <button type="button" class="tb-btn" data-dialog-close>Đóng</button>
+        <button type="submit" value="save" class="tb-btn tb-primary">Lưu cài đặt</button>
+      </footer>
+    </form>
+  </dialog>
+
+  <script type="module" src="./src/app.js"></script>
+</body>
+</html>
