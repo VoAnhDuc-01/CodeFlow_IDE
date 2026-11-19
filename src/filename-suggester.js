@@ -6,6 +6,17 @@
  * workspace so suggestions keep flowing line-by-line or block-by-block as you code.
  */
 
+import {
+	COMP1802_ARCHETYPE_KEYWORDS,
+	buildComp1802HtmlBodySteps,
+	buildComp1802CssSteps,
+} from './comp1802-templates.js';
+import {
+	SHOP1_ARCHETYPE_KEYWORDS,
+	buildShop1HtmlBodySteps,
+	buildShop1CssSteps,
+} from './shop1-templates.js';
+
 const STOP_WORDS = new Set([
 	'page', 'view', 'component', 'comp', 'section', 'part', 'module', 'template',
 	'layout', 'screen', 'ui', 'web', 'html', 'css', 'scss', 'file', 'new', 'test', 'demo',
@@ -58,32 +69,47 @@ export function analyzeFileName(filePath = 'index.html', languageOverride) {
 	};
 }
 
-const ARCHETYPE_KEYWORDS = [
+const CORE_ARCHETYPE_KEYWORDS = [
 	{ id: 'login', label: 'Đăng nhập / Auth', keywords: ['login', 'signin', 'sign-in', 'auth', 'authenticate', 'dang', 'nhap', 'dangnhap', 'sso'] },
 	{ id: 'register', label: 'Đăng ký / Sign Up', keywords: ['register', 'signup', 'sign-up', 'create-account', 'dangky', 'ky', 'onboarding'] },
 	{ id: 'navbar', label: 'Thanh điều hướng / Navbar', keywords: ['nav', 'navbar', 'header', 'topbar', 'menu', 'navigation', 'dieu', 'huong'] },
 	{ id: 'footer', label: 'Chân trang / Footer', keywords: ['footer', 'bottom', 'chan', 'sitemap'] },
 	{ id: 'pricing', label: 'Bảng giá / Pricing', keywords: ['pricing', 'price', 'plan', 'plans', 'tier', 'subscription', 'bang', 'gia', 'goi'] },
 	{ id: 'dashboard', label: 'Bảng điều khiển / Dashboard', keywords: ['dashboard', 'admin', 'analytics', 'panel', 'metrics', 'overview', 'quan', 'tri', 'thong', 'ke'] },
-	{ id: 'product', label: 'Thẻ sản phẩm / Product', keywords: ['product', 'products', 'shop', 'store', 'catalog', 'item', 'card', 'cards', 'san', 'pham', 'the'] },
-	{ id: 'cart', label: 'Giỏ hàng & Thanh toán / Cart', keywords: ['cart', 'checkout', 'payment', 'basket', 'order', 'gio', 'hang', 'thanh', 'toan'] },
+	{ id: 'product', label: 'Sản phẩm & Catalogue / Catalog', keywords: ['product', 'products', 'catalogue', 'catalog', 'store', 'item', 'card', 'cards', 'san', 'pham', 'the', 'fashion', 'tech', 'furniture', 'handmade', 'bookstore', 'flowers', 'organic', 'thoi-trang', 'nha-sach', 'noi-that', 'thu-cong', 'hoa'] },
+	{ id: 'cart', label: 'Giỏ hàng / Shopping Cart', keywords: ['cart', 'shopping-cart', 'shopping', 'basket', 'order', 'gio', 'hang', 'gio-hang'] },
 	{ id: 'profile', label: 'Hồ sơ người dùng / Profile', keywords: ['profile', 'account', 'user', 'member', 'avatar', 'bio', 'ho', 'so', 'tai', 'khoan'] },
-	{ id: 'contact', label: 'Liên hệ / Contact', keywords: ['contact', 'support', 'feedback', 'help', 'lien', 'he', 'ho', 'tro'] },
+	{ id: 'contact', label: 'Liên hệ / Contact', keywords: ['contact', 'support', 'help', 'lien', 'he', 'ho', 'tro'] },
 	{ id: 'modal', label: 'Hộp thoại / Modal Dialog', keywords: ['modal', 'dialog', 'popup', 'drawer', 'overlay', 'hop', 'thoai'] },
 	{ id: 'faq', label: 'Hỏi đáp / FAQ Accordion', keywords: ['faq', 'accordion', 'questions', 'hoi', 'dap', 'collapse'] },
 	{ id: 'table', label: 'Bảng dữ liệu / Data Table', keywords: ['table', 'datatable', 'grid-list', 'users', 'orders', 'danh', 'sach'] },
 	{ id: 'button', label: 'Hệ thống nút bấm / Buttons', keywords: ['button', 'buttons', 'btn', 'cta', 'nut'] },
 	{ id: 'sidebar', label: 'Thanh bên / Sidebar', keywords: ['sidebar', 'sidenav', 'aside', 'rail', 'thanh', 'ben'] },
-	{ id: 'gallery', label: 'Thư viện ảnh / Portfolio', keywords: ['gallery', 'portfolio', 'showcase', 'photo', 'photos', 'grid', 'thu', 'vien', 'anh', 'du', 'an'] },
-	{ id: 'blog', label: 'Bài viết / Blog Article', keywords: ['blog', 'article', 'post', 'news', 'story', 'bai', 'viet', 'tin', 'tuc'] },
+	{ id: 'gallery', label: 'Thư viện ảnh / Portfolio', keywords: ['gallery', 'portfolio', 'showcase', 'photo', 'photos', 'grid', 'thu', 'vien', 'anh', 'du', 'an', 'khung', 'album'] },
+	{ id: 'blog', label: 'Bài viết & Sổ tay / Blog', keywords: ['blog', 'study-blog', 'article', 'post', 'news', 'story', 'bai', 'viet', 'tin', 'tuc', 'ghi-chep'] },
 	{ id: '404', label: 'Trang lỗi 404 / Error', keywords: ['404', 'notfound', 'not-found', 'error', '403', '500', 'loi'] },
 	{ id: 'toast', label: 'Thông báo / Toast & Alert', keywords: ['toast', 'alert', 'notification', 'banner', 'thong', 'bao'] },
 	{ id: 'skeleton', label: 'Hiệu ứng tải / Skeleton & Loader', keywords: ['skeleton', 'loader', 'loading', 'spinner', 'shimmer'] },
-	{ id: 'variables', label: 'Biến thiết kế & Theme / Design Tokens', keywords: ['variable', 'variables', 'token', 'tokens', 'theme', 'reset', 'base', 'global', 'style', 'styles', 'colors', 'palette', 'main', 'app'] },
+	{ id: 'variables', label: 'Biến thiết kế, Theme & Nhận diện', keywords: ['variable', 'variables', 'token', 'tokens', 'theme', 'identity', 'brand-details', 'reset', 'base', 'global', 'style', 'styles', 'colors', 'palette', 'main', 'app'] },
 	{ id: 'animations', label: 'Hoạt ảnh / CSS Animations', keywords: ['animation', 'animations', 'animate', 'keyframe', 'keyframes', 'motion', 'transition', 'hieu', 'ung'] },
 	{ id: 'chat', label: 'Khung trò chuyện / Chat UI', keywords: ['chat', 'message', 'messages', 'inbox', 'conversation', 'tin', 'nhan'] },
 	{ id: 'hero', label: 'Trang chủ & Hero / Landing', keywords: ['hero', 'landing', 'home', 'index', 'welcome', 'trang', 'chu'] },
 ];
+
+const ARCHETYPE_KEYWORDS = [...CORE_ARCHETYPE_KEYWORDS, ...COMP1802_ARCHETYPE_KEYWORDS, ...SHOP1_ARCHETYPE_KEYWORDS];
+
+export function getArchetypeCatalog() {
+	return ARCHETYPE_KEYWORDS.map(entry => ({
+		id: entry.id,
+		label: entry.label,
+		keywords: [...entry.keywords],
+		source: SHOP1_ARCHETYPE_KEYWORDS.some(s => s.id === entry.id)
+			? 'shop1'
+			: COMP1802_ARCHETYPE_KEYWORDS.some(c => c.id === entry.id)
+				? 'comp1802'
+				: 'core',
+	}));
+}
 
 const SECONDARY_LAYOUT_KEYWORDS = new Set(['card', 'cards', 'grid', 'panel', 'table', 'list', 'box', 'row', 'page']);
 
@@ -897,7 +923,10 @@ function buildHtmlBlueprint(info, allFiles) {
 		],
 	};
 
-	const chosenBody = bodyByArchetype[info.archetype.id] || [
+	const chosenBody = bodyByArchetype[info.archetype.id]
+		|| buildShop1HtmlBodySteps(info.archetype.id, info)
+		|| buildComp1802HtmlBodySteps(info.archetype.id, info)
+		|| [
 		{
 			id: `custom-${s}-header`,
 			title: `Phần đầu trang ${info.title}`,
@@ -1270,6 +1299,16 @@ function buildCssBlueprint(info) {
 		return byArchetype[info.archetype.id];
 	}
 
+	const shop1Css = buildShop1CssSteps(info.archetype.id);
+	if (shop1Css) {
+		return shop1Css;
+	}
+
+	const comp1802Css = buildComp1802CssSteps(info.archetype.id);
+	if (comp1802Css) {
+		return comp1802Css;
+	}
+
 	return [
 		tokensStep,
 		{
@@ -1576,16 +1615,22 @@ export function computeContinuousSuggestion({
 			unstyledHtmlClasses = htmlSymbols.classes.filter(c => !defined.has(`.${c}`));
 		}
 
-		// Build dynamic HTML-linked CSS steps ahead of generic blueprint steps
-		const linkedSteps = unstyledHtmlClasses.map(cls => ({
-			id: `linked-cls-${cls}`,
-			title: `Style class .${cls} (từ ${partner?.path || 'HTML'})`,
-			selector: `.${cls}`,
-			marker: new RegExp(`\\.${escapeRegExp(cls)}\\s*\\{`),
-			lines: buildCssRuleForSymbol(cls, false),
-		}));
+		// Prioritize the filename's dedicated CSS blueprint first, then synthesize rules for any extra unstyled HTML classes
+		const remainingBlueprint = blueprint.filter(st => !st.marker.test(content));
+		const blueprintText = remainingBlueprint.map(st => st.lines.join('\n')).join('\n');
+		const blueprintClasses = new Set([...blueprintText.matchAll(/\.([a-zA-Z_-][\w-]*)/g)].map(m => m[1]));
 
-		const allSteps = [...linkedSteps, ...blueprint.filter(st => !st.marker.test(content))];
+		const linkedSteps = unstyledHtmlClasses
+			.filter(cls => !blueprintClasses.has(cls))
+			.map(cls => ({
+				id: `linked-cls-${cls}`,
+				title: `Style class .${cls} (từ ${partner?.path || 'HTML'})`,
+				selector: `.${cls}`,
+				marker: new RegExp(`\\.${escapeRegExp(cls)}\\s*\\{`),
+				lines: buildCssRuleForSymbol(cls, false),
+			}));
+
+		const allSteps = [...remainingBlueprint, ...linkedSteps];
 		upcomingSteps = allSteps.slice(0, 6).map(st => ({
 			id: st.id,
 			title: st.title,
@@ -1698,7 +1743,7 @@ export function computeContinuousSuggestion({
 			preview: st.lines.join('\n'),
 		}));
 
-		const isAfterClosedTag = /(<\/[a-z0-9-]+>|\/>)\s*$/i.test(trimmedPrefix) && lineSuffix.trim() === '';
+		const isAfterTagBoundary = /(<\/[a-z0-9-]+>|\/>|<(?:head|body|main|section|header|nav|form|article|aside|footer|div|ul|ol)\b[^>]*>)\s*$/i.test(trimmedPrefix) && lineSuffix.trim() === '';
 		const cursorBeforeBodyOrDoc = /<body\b/i.test(textAfter) && !htmlCtx.inHead && !htmlCtx.inBody;
 
 		if (cursorBeforeBodyOrDoc) {
@@ -1708,7 +1753,7 @@ export function computeContinuousSuggestion({
 				title: st.title,
 				preview: st.lines.join('\n'),
 			}));
-		} else if (trimmedPrefix && !isAfterClosedTag) {
+		} else if (trimmedPrefix && !isAfterTagBoundary) {
 			// Match partial text against lines inside remaining blueprint steps
 			for (const step of prioritized) {
 				for (let i = 0; i < step.lines.length; i++) {
@@ -1768,13 +1813,21 @@ export function computeContinuousSuggestion({
 				const linesToUse = filterRedundantClosings(rawLines, textAfter);
 				if (!linesToUse.length) continue;
 				const slice = mode === 'line' ? [linesToUse[0]] : linesToUse;
-				if (isAfterClosedTag) {
-					const blockOnNewLine = alignLinesToCurrentIndent(slice, currentIndent);
-					if (blockOnNewLine) {
+				if (isAfterTagBoundary) {
+					const isRootClosing = /^<\/(head|body|html)>$/i.test(slice[0].trim());
+					if (isRootClosing || currentIndent === '') {
 						candidates.push({
 							label: step.title,
-							insertText: `\n${currentIndent}${blockOnNewLine}`,
+							insertText: `\n${slice.join('\n')}`,
 						});
+					} else {
+						const blockOnNewLine = alignLinesToCurrentIndent(slice, currentIndent);
+						if (blockOnNewLine) {
+							candidates.push({
+								label: step.title,
+								insertText: `\n${currentIndent}${blockOnNewLine}`,
+							});
+						}
 					}
 				} else {
 					const aligned = alignLinesToCurrentIndent(slice, linePrefix);
